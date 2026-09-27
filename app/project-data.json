@@ -1,0 +1,36 @@
+{
+  "projects": [
+    {
+      "name": "Atlas onboarding",
+      "owner": "Mona Patel",
+      "status": "On track",
+      "recentActivity": "Contributor setup guide reviewed; first-run checklist is ready for feedback.",
+      "priority": "Medium",
+      "summary": "Make it easier for new contributors to find their first useful task and get started."
+    },
+    {
+      "name": "Northstar analytics",
+      "owner": "Jordan Lee",
+      "status": "Needs attention",
+      "recentActivity": "The event schema is drafted; one decision on retention is holding up implementation.",
+      "priority": "High",
+      "summary": "Give teams a dependable view of adoption trends without adding friction to the product."
+    },
+    {
+      "name": "Beacon accessibility",
+      "owner": "Sam Rivera",
+      "status": "In progress",
+      "recentActivity": "Keyboard and screen-reader checks are underway on the most-used workflows.",
+      "priority": "High",
+      "summary": "Identify and address barriers so more people can use core product experiences."
+    },
+    {
+      "name": "Garden design system",
+      "owner": "Avery Chen",
+      "status": "Planning",
+      "recentActivity": "Component inventory shared with product teams; input is being gathered this week.",
+      "priority": "Low",
+      "summary": "Create a small, consistent set of interface patterns that teams can reuse confidently."
+    }
+  ]
+}

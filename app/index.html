@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f7fb">
+    <meta name="description" content="A clear, contributor-friendly overview of project status, ownership, and priorities.">
+    <title>Project Pulse</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="dashboard">
+      <header class="dashboard-header">
+        <div class="eyebrow"><span class="pulse-dot" aria-hidden="true"></span> TEAM OVERVIEW</div>
+        <h1>Project Pulse</h1>
+        <p class="dashboard-intro">A quick read on what’s moving, who’s leading, and where the team can help.</p>
+      </header>
+
+      <section class="projects-section" aria-labelledby="projects-heading">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">YOUR WORKSPACE</p>
+            <h2 id="projects-heading">Projects</h2>
+          </div>
+          <p class="section-note">Status, activity, and priority at a glance</p>
+        </div>
+        <div id="projects" class="project-grid" aria-live="polite" aria-busy="true">
+          <p class="loading-message">Loading projects…</p>
+        </div>
+      </section>
+      <footer class="dashboard-footer">A shared snapshot for better collaboration.</footer>
+    </main>
+
+    <script>
+      const projectList = document.querySelector("#projects");
+      const allowedLevels = new Set(["low", "medium", "high", "critical"]);
+
+      function createField(label, value, className) {
+        const wrapper = document.createElement("div");
+        wrapper.className = `project-detail ${className}`;
+
+        const caption = document.createElement("span");
+        caption.className = "detail-label";
+        caption.textContent = label;
+
+        const content = document.createElement("span");
+        content.className = "detail-value";
+        content.textContent = value;
+
+        wrapper.append(caption, content);
+        return wrapper;
+      }
+
+      function createProjectCard(project) {
+        const card = document.createElement("article");
+        card.className = "project-card";
+
+        const top = document.createElement("div");
+        top.className = "card-topline";
+
+        const name = document.createElement("h3");
+        name.className = "project-name";
+        name.textContent = project.name;
+
+        const status = document.createElement("span");
+        const normalizedStatus = String(project.status).toLowerCase();
+        const statusClass = normalizedStatus.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+        status.className = `status-badge${["on-track", "needs-attention", "in-progress", "planning", "blocked"].includes(statusClass) ? ` status-${statusClass}` : ""}`;
+        status.textContent = project.status;
+        top.append(name, status);
+
+        const summary = document.createElement("p");
+        summary.className = "project-summary";
+        summary.textContent = project.summary;
+
+        const owner = createField("OWNER", project.owner, "owner-detail");
+        const activity = createField("RECENT ACTIVITY", project.recentActivity, "activity-detail");
+
+        const priorityRow = document.createElement("div");
+        priorityRow.className = "priority-row";
+        const priorityLabel = document.createElement("span");
+        priorityLabel.className = "detail-label";
+        priorityLabel.textContent = "PRIORITY";
+        const priority = document.createElement("span");
+        const normalizedPriority = String(project.priority).toLowerCase();
+        priority.className = `priority-badge${allowedLevels.has(normalizedPriority) ? ` priority-${normalizedPriority}` : ""}`;
+        priority.textContent = project.priority;
+        priorityRow.append(priorityLabel, priority);
+
+        card.append(top, summary, owner, activity, priorityRow);
+        return card;
+      }
+
+      async function loadProjects() {
+        try {
+          const response = await fetch("project-data.json");
+          if (!response.ok) {
+            throw new Error(`Project data request failed (${response.status}).`);
+          }
+
+          const data = await response.json();
+          if (!data || !Array.isArray(data.projects)) {
+            throw new Error("Project data must contain a projects array.");
+          }
+
+          projectList.replaceChildren();
+          if (data.projects.length === 0) {
+            const emptyMessage = document.createElement("p");
+            emptyMessage.className = "empty-message";
+            emptyMessage.textContent = "No projects to show yet.";
+            projectList.append(emptyMessage);
+          } else {
+            for (const project of data.projects) {
+              const requiredFields = ["name", "owner", "status", "recentActivity", "priority", "summary"];
+              if (requiredFields.some((field) => typeof project?.[field] !== "string")) {
+                throw new Error("Each project must include name, owner, status, recentActivity, priority, and summary text.");
+              }
+              projectList.append(createProjectCard(project));
+            }
+          }
+        } catch (error) {
+          const message = document.createElement("p");
+          message.className = "error-message";
+          message.setAttribute("role", "alert");
+          message.textContent = `Projects could not be loaded. ${error.message}`;
+          projectList.replaceChildren(message);
+        } finally {
+          projectList.setAttribute("aria-busy", "false");
+        }
+      }
+
+      loadProjects();
+    </script>
+  </body>
+</html>
